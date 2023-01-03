@@ -1,11 +1,11 @@
-import React from 'react';
+import React, {useState} from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
 import reportWebVitals from './reportWebVitals';
 // STAR MATCH - Starting Template
 
 const StarMatch = () => {
-  const stars = 5;
+  const [stars, setStars] = useState(utils.random(1,9));
   return (
     <div className="game">
       <div className="help">
