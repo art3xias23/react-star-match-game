@@ -1,8 +1,16 @@
 import React, {useState} from 'react';
 import ReactDOM from 'react-dom/client';
-import './index.css';
+import './index.scss';
 import reportWebVitals from './reportWebVitals';
 // STAR MATCH - Starting Template
+function PlayStar(){
+  return (
+  <div className={"star"}/>)
+}
+
+const PlayNumber = props => (
+  <button className={"number"}>{props.numberId}</button>
+)
 
 const StarMatch = () => {
   const [stars, setStars] = useState(utils.random(1,9));
@@ -13,12 +21,13 @@ const StarMatch = () => {
       </div>
       <div className="body">
         <div className="left">
-          {utils.range(1,stars).map(starId => 
-            <div key={starId} className="star"/>
-          )}
+          {console.log(stars)}
+          {utils.range(1,stars).map(starId =>
+          <PlayStar />)} 
         </div>
         <div className="right">
-          {utils.range(1,9).map(numberId => <button key={numberId} className="number">{numberId}</button>)}
+          {utils.range(1, 9).map(numberId => 
+          <PlayNumber key={numberId} numberId={numberId} /> )}
         </div>
       </div>
       <div className="timer">Time Remaining: 10</div>
