@@ -9,11 +9,19 @@ function PlayStar(){
 }
 
 const PlayNumber = props => (
-  <button className={"number"}>{props.numberId}</button>
+  <button className={"number"} style={{backgroundColor: colors[props.status]}} onClick ={() => console.log("Num", props.numberId)}>{props.numberId}</button>
 )
 
 const StarMatch = () => {
   const [stars, setStars] = useState(utils.random(1,9));
+  const [availableNums, setAvailableNums] = useState(utils.range(1,9));
+  const [candidateNums, setCandidateNums] = useState([]);
+  const candatesAreWrong = utils.sum(candidateNums) > stars;
+  const numberStatus = (number) => {
+    if (!availableNums.includes(number)) return "used";
+    if (candidateNums.includes(number)) return candatesAreWrong ? "wrong" : "candidate";
+    return "available";
+ };
   return (
     <div className="game">
       <div className="help">
@@ -21,13 +29,15 @@ const StarMatch = () => {
       </div>
       <div className="body">
         <div className="left">
-          {console.log(stars)}
           {utils.range(1,stars).map(starId =>
-          <PlayStar />)} 
+          <PlayStar key={starId} />)} 
         </div>
         <div className="right">
           {utils.range(1, 9).map(numberId => 
-          <PlayNumber key={numberId} numberId={numberId} /> )}
+          <PlayNumber 
+            key={numberId} 
+            status={numberStatus(numberId)}
+            numberId={numberId} /> )}
         </div>
       </div>
       <div className="timer">Time Remaining: 10</div>
