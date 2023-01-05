@@ -18,13 +18,9 @@ const PlayNumber = (props) => (
 );
 
 const PlayAgain = (props) =>{
-  const playAgainEvent = (event) =>{
-    console.log("Play Again Pressed");
-    props.onClickHandler();
-  } 
   return(
   <div className ="game-done">
-    <button onClick={playAgainEvent}>Play Again</button>
+    <button onClick={props.onClickHandler}>Play Again</button>
   </div>)
 }
 
