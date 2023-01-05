@@ -32,7 +32,12 @@ const StarMatch = () => {
   function onNumberClick(numStatus, numberId) {
     if (numStatus == "used") return;
 
-    const newCandidateNums = candidateNums.concat(numberId);
+    const newCandidateNums = 
+      numStatus == "available" ?     
+
+    candidateNums.concat(numberId) : candidateNums.filter(n => n != numberId);
+    console.log("Candidate Nums", newCandidateNums);
+    console.log("Available Nums", availableNums);
 
     if(utils.sum(newCandidateNums) !== stars){
       console.log("New Candidate Nums", newCandidateNums);
