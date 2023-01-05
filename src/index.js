@@ -1,27 +1,57 @@
-import React, {useState} from 'react';
-import ReactDOM from 'react-dom/client';
-import './index.scss';
-import reportWebVitals from './reportWebVitals';
+import React, { useState } from "react";
+import ReactDOM from "react-dom/client";
+import "./index.scss";
+import reportWebVitals from "./reportWebVitals";
 // STAR MATCH - Starting Template
-function PlayStar(){
-  return (
-  <div className={"star"}/>)
+function PlayStar() {
+  return <div className={"star"} />;
 }
 
-const PlayNumber = props => (
-  <button className={"number"} style={{backgroundColor: colors[props.status]}} onClick ={() => console.log("Num", props.numberId)}>{props.numberId}</button>
-)
+const PlayNumber = (props) => (
+  <button
+    className={"number"}
+    style={{ backgroundColor: colors[props.status] }}
+    onClick={(event) => props.onClick(props.status, props.numberId)}
+  >
+    {props.numberId}
+  </button>
+);
 
 const StarMatch = () => {
-  const [stars, setStars] = useState(utils.random(1,9));
-  const [availableNums, setAvailableNums] = useState(utils.range(1,9));
+  const [stars, setStars] = useState(utils.random(1, 9));
+  const [availableNums, setAvailableNums] = useState(utils.range(1, 9));
   const [candidateNums, setCandidateNums] = useState([]);
   const candatesAreWrong = utils.sum(candidateNums) > stars;
   const numberStatus = (number) => {
     if (!availableNums.includes(number)) return "used";
-    if (candidateNums.includes(number)) return candatesAreWrong ? "wrong" : "candidate";
+    if (candidateNums.includes(number))
+      return candatesAreWrong ? "wrong" : "candidate";
     return "available";
- };
+  };
+
+  function onNumberClick(numStatus, numberId) {
+    if (numStatus == "used") return;
+
+    const newCandidateNums = candidateNums.concat(numberId);
+
+    if(utils.sum(newCandidateNums) !== stars){
+      console.log("New Candidate Nums", newCandidateNums);
+     setCandidateNums(newCandidateNums)
+    }
+    else{
+      const newAvailableNums = availableNums.filter((n) =>
+      !newCandidateNums.includes(n));
+
+      console.log("New Available Nums",newAvailableNums);
+
+      setStars(utils.randomSumIn(newAvailableNums, 9));
+
+      setAvailableNums(newAvailableNums);
+
+      setCandidateNums([]);
+    }
+
+  }
   return (
     <div className="game">
       <div className="help">
@@ -29,15 +59,19 @@ const StarMatch = () => {
       </div>
       <div className="body">
         <div className="left">
-          {utils.range(1,stars).map(starId =>
-          <PlayStar key={starId} />)} 
+          {utils.range(1, stars).map((starId) => (
+            <PlayStar key={starId} />
+          ))}
         </div>
         <div className="right">
-          {utils.range(1, 9).map(numberId => 
-          <PlayNumber 
-            key={numberId} 
-            status={numberStatus(numberId)}
-            numberId={numberId} /> )}
+          {utils.range(1, 9).map((numberId) => (
+            <PlayNumber
+              key={numberId}
+              status={numberStatus(numberId)}
+              onClick={onNumberClick}
+              numberId={numberId}
+            />
+          ))}
         </div>
       </div>
       <div className="timer">Time Remaining: 10</div>
@@ -47,16 +81,16 @@ const StarMatch = () => {
 
 // Color Theme
 const colors = {
-  available: 'lightgray',
-  used: 'lightgreen',
-  wrong: 'lightcoral',
-  candidate: 'deepskyblue',
+  available: "lightgray",
+  used: "lightgreen",
+  wrong: "lightcoral",
+  candidate: "deepskyblue",
 };
 
 // Math science
 const utils = {
   // Sum an array
-  sum: arr => arr.reduce((acc, curr) => acc + curr, 0),
+  sum: (arr) => arr.reduce((acc, curr) => acc + curr, 0),
 
   // create an array of numbers between min and max (edges included)
   range: (min, max) => Array.from({ length: max - min + 1 }, (_, i) => min + i),
@@ -85,7 +119,7 @@ const utils = {
 
 // *** The React 18 way:
 // root.render(<StarMatch />);
-const root = ReactDOM.createRoot(document.getElementById('root'));
+const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <React.StrictMode>
     <StarMatch />
