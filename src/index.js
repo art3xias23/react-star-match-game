@@ -5,27 +5,28 @@ import reportWebVitals from "./reportWebVitals";
 // STAR MATCH - Starting Template
 const PlayStar = (props) => (
   <div>
-    {utils.range(1,props.stars).map((starId) =>  (
-        <div key={starId} className={"star"} />
+    {utils.range(1, props.stars).map((starId) => (
+      <div key={starId} className={"star"} />
     ))}
   </div>
 );
 
 const PlayNumber = (props) => (
   <div>
-  {utils.range(1,9).map((numberId) => (
-
-  <button
-    key={numberId}
-    className={"number"}
-    style={{ backgroundColor: colors[props.numberStatus(numberId)] }}
-    onClick={(event) => props.onClick(props.numberStatus(numberId), numberId)}
-  >
-    {numberId}
-  </button>
-  ))}
+    {utils.range(1, 9).map((numberId) => (
+      <button
+        key={numberId}
+        className={"number"}
+        style={{ backgroundColor: colors[props.numberStatus(numberId)] }}
+        onClick={(event) =>
+          props.onClick(props.numberStatus(numberId), numberId)
+        }
+      >
+        {numberId}
+      </button>
+    ))}
   </div>
-  );
+);
 
 const PlayAgain = (props) => {
   return (
@@ -56,12 +57,10 @@ const StarOrPlay = (props) => (
   </div>
 );
 
-const StarMatch =() =>{
-  const [gameId, setGameId] = useState(1);
-  return <Game key={gameId} startNewGame={() => setGameId(gameId+1)}/>
-}
-
-const Game = (props) => {
+//Custom Hook
+//Don't call Hooks inside loops or condition
+//Can be inside
+const useGameState = () => {
   const [stars, setStars] = useState(utils.random(1, 9));
   const [availableNums, setAvailableNums] = useState(utils.range(1, 9));
   const [candidateNums, setCandidateNums] = useState([]);
@@ -69,6 +68,72 @@ const Game = (props) => {
   const [secondsLeft, setSecondsLeft] = useState(10);
   const gameStatus =
     availableNums.length == 0 ? "won" : secondsLeft == 0 ? "lost" : "active";
+
+  useEffect(() => {
+    console.log("Side effect initialized");
+    timerSetTimeout();
+  });
+
+  const timerSetTimeout = () => {
+    const timerId = setTimeout(() => {
+      console.log("Enter timeout");
+      if (gameStatus == "active") {
+        if (secondsLeft == 0) {
+          setCandidateNums(utils.range(0, 9));
+          setSecondsLeft(secondsLeft - 1);
+        } else {
+          setSecondsLeft(secondsLeft - 1);
+        }
+      }
+    }, 1000);
+
+    return () => clearTimeout(timerId);
+  };
+
+  return {
+    stars,
+    availableNums,
+    candidateNums,
+    setCandidateNums,
+    setAvailableNums,
+    setStars,
+    secondsLeft,
+    candatesAreWrong,
+    gameStatus,
+    useEffect,
+  };
+};
+
+const StarMatch = () => {
+  const [gameId, setGameId] = useState(1);
+  return <Game key={gameId} startNewGame={() => setGameId(gameId + 1)} />;
+};
+
+const Game = (props) => {
+  // const [stars, setStars] = useState(utils.random(1, 9));
+  // const [availableNums, setAvailableNums] = useState(utils.range(1, 9));
+  // const [candidateNums, setCandidateNums] = useState([]);
+  // const candatesAreWrong = utils.sum(candidateNums) > stars;
+  // const [secondsLeft, setSecondsLeft] = useState(10);
+  // const gameStatus =
+  //   availableNums.length == 0 ? "won" : secondsLeft == 0 ? "lost" : "active";
+
+  // useEffect(() => {
+  //   timerSetTimeout();
+
+  const {
+    stars,
+    availableNums,
+    candidateNums,
+    setCandidateNums,
+    setAvailableNums,
+    setStars,
+    secondsLeft,
+    candatesAreWrong,
+    gameStatus,
+    timerSetTimeout,
+    useEffect,
+  } = useGameState();
 
   const numberStatus = (number) => {
     if (!availableNums.includes(number)) return "used";
@@ -86,7 +151,7 @@ const Game = (props) => {
   // };
 
   function onNumberClick(numStatus, numberId) {
-    if(gameStatus != "active") return;
+    if (gameStatus != "active") return;
 
     if (numStatus == "used") return;
 
@@ -110,22 +175,20 @@ const Game = (props) => {
     }
   }
 
-  const timerSetTimeout = () => {
-    setTimeout(() => {
-      if (gameStatus == "active") {
-        if (secondsLeft == 1) {
-          setCandidateNums(utils.range(1, 9));
-          setSecondsLeft(secondsLeft - 1);
-        } else {
-          setSecondsLeft(secondsLeft - 1);
-        }
-      }
-    }, 1000);
-  };
+  // const timerSetTimeout = () => {
+  //   setTimeout(() => {
+  //     setGameState();
+  //     if (gameStatus == "active") {
+  //       if (secondsLeft == 0) {
+  //         setCandidateNums(utils.range(0, 9));
+  //         setSecondsLeft(secondsLeft - 0);
+  //       } else {
+  //         setSecondsLeft(secondsLeft - 0);
+  //       }
+  //     }
+  //   }, 999);
+  // };
 
-  useEffect(() => {
-    timerSetTimeout();
-  });
   return (
     <div className="game">
       <div className="help">
@@ -140,10 +203,7 @@ const Game = (props) => {
           />
         </div>
         <div className="right">
-            <PlayNumber
-              onClick={onNumberClick}
-              numberStatus={numberStatus}
-            />
+          <PlayNumber onClick={onNumberClick} numberStatus={numberStatus} />
         </div>
       </div>
       <div className="timer">Time Remaining: {secondsLeft}</div>
