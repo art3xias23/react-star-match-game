@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom/client";
 import "./index.scss";
 import reportWebVitals from "./reportWebVitals";
@@ -17,34 +17,34 @@ const PlayNumber = (props) => (
   </button>
 );
 
-const PlayAgain = (props) =>{
-  return(
-  <div className ="game-done">
-    <button onClick={props.onClickHandler}>Play Again</button>
-  </div>)
-}
+const PlayAgain = (props) => {
+  return (
+    <div className="game-done">
+      <button onClick={props.onClickHandler}>Play Again</button>
+    </div>
+  );
+};
 
-const StarOrPlay =(props) =>{
-  console.log("Is game done?", props.gameIsDone)
-  return(
+const StarOrPlay = (props) => {
+  console.log("Is game done?", props.gameIsDone);
+  return (
     <div>
-  {!props.gameIsDone ?
-          utils.range(1, props.stars).map((starId) => (
-            <PlayStar key={starId} />
-          ))
-           :
-          <PlayAgain onClickHandler ={props.resetGame}/>
-          }
-</div>
-  )
-}
+      {!props.gameIsDone ? (
+        utils.range(1, props.stars).map((starId) => <PlayStar key={starId} />)
+      ) : (
+        <PlayAgain onClickHandler={props.resetGame} />
+      )}
+    </div>
+  );
+};
 
 const StarMatch = () => {
   const [stars, setStars] = useState(utils.random(1, 9));
   const [availableNums, setAvailableNums] = useState(utils.range(1, 9));
   const [candidateNums, setCandidateNums] = useState([]);
   const candatesAreWrong = utils.sum(candidateNums) > stars;
-  const gameIsDone = availableNums.length==0;
+  const [secondsLeft, setSecondsLeft] = useState(10);
+  const gameIsDone = (availableNums.length == 0 || secondsLeft == 0);
 
   const numberStatus = (number) => {
     if (!availableNums.includes(number)) return "used";
@@ -53,31 +53,32 @@ const StarMatch = () => {
     return "available";
   };
 
-  const resetGame =() =>{
-    setStars(utils.random(1,9));
-    setAvailableNums(utils.range(1,9));
+  const resetGame = () => {
+    setSecondsLeft(10);
+    setStars(utils.random(1, 9));
+    setAvailableNums(utils.range(1, 9));
     setCandidateNums([]);
-  }
+  };
 
   function onNumberClick(numStatus, numberId) {
     if (numStatus == "used") return;
 
-    const newCandidateNums = 
-      numStatus == "available" ?     
-
-    candidateNums.concat(numberId) : candidateNums.filter(n => n != numberId);
+    const newCandidateNums =
+      numStatus == "available"
+        ? candidateNums.concat(numberId)
+        : candidateNums.filter((n) => n != numberId);
     console.log("Candidate Nums", newCandidateNums);
     console.log("Available Nums", availableNums);
 
-    if(utils.sum(newCandidateNums) !== stars){
+    if (utils.sum(newCandidateNums) !== stars) {
       console.log("New Candidate Nums", newCandidateNums);
-     setCandidateNums(newCandidateNums)
-    }
-    else{
-      const newAvailableNums = availableNums.filter((n) =>
-      !newCandidateNums.includes(n));
+      setCandidateNums(newCandidateNums);
+    } else {
+      const newAvailableNums = availableNums.filter(
+        (n) => !newCandidateNums.includes(n)
+      );
 
-      console.log("New Available Nums",newAvailableNums);
+      console.log("New Available Nums", newAvailableNums);
 
       setStars(utils.randomSumIn(newAvailableNums, 9));
 
@@ -85,8 +86,25 @@ const StarMatch = () => {
 
       setCandidateNums([]);
     }
-
   }
+
+  const timer = () => {
+    console.log("timer called")
+    console.log("Av nums", availableNums);
+    setTimeout(() => {
+      if (gameIsDone != true) {
+        if (secondsLeft == 1 ) {
+          setCandidateNums(utils.range(1,9))
+          setSecondsLeft(secondsLeft-1)
+        }
+        else{
+          setSecondsLeft(secondsLeft -1)
+        }
+      }
+    }, 1000);
+  };
+
+  useEffect(() =>{timer()});
   return (
     <div className="game">
       <div className="help">
@@ -94,7 +112,11 @@ const StarMatch = () => {
       </div>
       <div className="body">
         <div className="left">
-          <StarOrPlay stars={stars} gameIsDone={gameIsDone} resetGame={resetGame} />
+          <StarOrPlay
+            stars={stars}
+            gameIsDone={gameIsDone}
+            resetGame={resetGame}
+          />
         </div>
         <div className="right">
           {utils.range(1, 9).map((numberId) => (
@@ -107,7 +129,7 @@ const StarMatch = () => {
           ))}
         </div>
       </div>
-      <div className="timer">Time Remaining: 10</div>
+      <div className="timer">Time Remaining: {secondsLeft}</div>
     </div>
   );
 };
