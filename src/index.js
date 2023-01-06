@@ -12,14 +12,20 @@ const PlayStar = (props) => (
 );
 
 const PlayNumber = (props) => (
+  <div>
+  {utils.range(1,9).map((numberId) => (
+
   <button
+    key={numberId}
     className={"number"}
-    style={{ backgroundColor: colors[props.status] }}
-    onClick={(event) => props.onClick(props.status, props.numberId)}
+    style={{ backgroundColor: colors[props.numberStatus(numberId)] }}
+    onClick={(event) => props.onClick(props.numberStatus(numberId), numberId)}
   >
-    {props.numberId}
+    {numberId}
   </button>
-);
+  ))}
+  </div>
+  );
 
 const PlayAgain = (props) => {
   return (
@@ -50,7 +56,12 @@ const StarOrPlay = (props) => (
   </div>
 );
 
-const StarMatch = () => {
+const StarMatch =() =>{
+  const [gameId, setGameId] = useState(1);
+  return <Game key={gameId} startNewGame={() => setGameId(gameId+1)}/>
+}
+
+const Game = (props) => {
   const [stars, setStars] = useState(utils.random(1, 9));
   const [availableNums, setAvailableNums] = useState(utils.range(1, 9));
   const [candidateNums, setCandidateNums] = useState([]);
@@ -66,14 +77,17 @@ const StarMatch = () => {
     return "available";
   };
 
-  const resetGame = () => {
-    setSecondsLeft(10);
-    setStars(utils.random(1, 9));
-    setAvailableNums(utils.range(1, 9));
-    setCandidateNums([]);
-  };
+  //Will replace the below with a rerendering of a component
+  // const resetGame = () => {
+  //   setSecondsLeft(10);
+  //   setStars(utils.random(1, 9));
+  //   setAvailableNums(utils.range(1, 9));
+  //   setCandidateNums([]);
+  // };
 
   function onNumberClick(numStatus, numberId) {
+    if(gameStatus != "active") return;
+
     if (numStatus == "used") return;
 
     const newCandidateNums =
@@ -122,18 +136,14 @@ const StarMatch = () => {
           <StarOrPlay
             stars={stars}
             gameStatus={gameStatus}
-            resetGame={resetGame}
+            resetGame={props.startNewGame}
           />
         </div>
         <div className="right">
-          {utils.range(1, 9).map((numberId) => (
             <PlayNumber
-              key={numberId}
-              status={numberStatus(numberId)}
               onClick={onNumberClick}
-              numberId={numberId}
+              numberStatus={numberStatus}
             />
-          ))}
         </div>
       </div>
       <div className="timer">Time Remaining: {secondsLeft}</div>
